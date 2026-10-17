@@ -18,7 +18,7 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      "no-unusedVars": "off",
+      "no-unused-vars": "off",
     },
   },
 ]);
