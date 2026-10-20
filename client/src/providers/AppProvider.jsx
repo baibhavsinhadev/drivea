@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import AppContext from "../context/AppContext";
 import api from "../config/api";
@@ -7,6 +8,24 @@ const getErrMsg = (err, fallback) => err?.response?.data?.message || fallback;
 
 const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Refresh User Profile & Storage Stats
+  const refreshUser = useCallback(async () => {
+    try {
+      const { data } = await api.get("/api/auth/me");
+      setUser(data.user);
+      return data.user;
+    } catch (error) {
+      setUser(null);
+      return null;
+    }
+  }, []);
+
+  // Check Auth Status on App Load
+  useEffect(() => {
+    refreshUser().finally(() => setIsLoading(false));
+  }, [refreshUser]);
 
   // Auth Actions Helper
   const authAction = async (requestFn, successMsg, errorFallback) => {
@@ -48,6 +67,11 @@ const AppProvider = ({ children }) => {
   };
 
   const value = {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+
+    setUser,
     login,
     logout,
     register,
